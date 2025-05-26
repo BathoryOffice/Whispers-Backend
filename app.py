@@ -1,10 +1,12 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS      
 import whisper
 import os
 import uuid
 import threading
 
 app = Flask(__name__)
+CORS(app)
 
 tasks = {}
 
