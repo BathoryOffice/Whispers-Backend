@@ -61,7 +61,7 @@ def upload_audio():
                 os.remove(temp_path)
 
     threading.Thread(target=transcribe).start()
-    return jsonify({'taskId': task_id}), 202
+    return jsonify({'taskId': task_id, 'debug': 'esto es código nuevo'}), 202
 
 @app.route('/status/<task_id>', methods=['GET'])
 def check_status(task_id):
