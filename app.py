@@ -6,24 +6,14 @@ import uuid
 import threading
 
 app = Flask(__name__)
-CORS(app)  # <- Sigue habilitando CORS “automáticamente”, aunque no bastó
+CORS(app)
 
-# —————— Bloque para inyectar encabezados CORS en TODAS las respuestas ——————
 @app.after_request
 def add_cors_headers(response):
-    """
-    Cada vez que Flask devuelva una respuesta, este decorador
-    agregará manualmente los headers CORS necesarios:
-      - Access-Control-Allow-Origin
-      - Access-Control-Allow-Methods
-      - Access-Control-Allow-Headers
-    de modo que el navegador permita cualquier origen a nuestro backend.
-    """
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET,POST,OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
     return response
-# ——————————————————————————————————————————————————————————————————————————
 
 tasks = {}
 
@@ -45,14 +35,17 @@ def upload_audio():
 
     def transcribe():
         try:
+            print(f"[INFO] Iniciando transcripción para: {temp_path}")
             model = whisper.load_model("tiny")
-            result = model.transcribe(temp_path, language="Spanish")
+            result = model.transcribe(temp_path, language="English")
+            print(f"[INFO] Transcripción terminada: {result['text']}")
             tasks[task_id] = {
                 'status': 'completed',
                 'transcription': result['text']
             }
             os.remove(temp_path)
         except Exception as e:
+            print(f"[ERROR] Falló la transcripción: {e}")
             tasks[task_id] = {
                 'status': 'failed',
                 'error': str(e)
@@ -61,7 +54,7 @@ def upload_audio():
                 os.remove(temp_path)
 
     threading.Thread(target=transcribe).start()
-    return jsonify({'taskId': task_id, 'debug': 'esto es código nuevo'}), 202
+    return jsonify({'taskId': task_id}), 202
 
 @app.route('/status/<task_id>', methods=['GET'])
 def check_status(task_id):
@@ -71,7 +64,6 @@ def check_status(task_id):
         return jsonify({'status': 'not_found', 'error': 'Tarea no encontrada'}), 404
 
     return jsonify(task)
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
