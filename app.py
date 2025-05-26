@@ -45,8 +45,8 @@ def upload_audio():
 
     def transcribe():
         try:
-            model = whisper.load_model("small")
-            result = model.transcribe(temp_path, language="English")
+            model = whisper.load_model("tiny")
+            result = model.transcribe(temp_path, language="Spanish")
             tasks[task_id] = {
                 'status': 'completed',
                 'transcription': result['text']
