@@ -65,10 +65,13 @@ def upload_audio():
 
 @app.route('/status/<task_id>', methods=['GET'])
 def check_status(task_id):
-    task = tasks.get(task_id, {'status': 'not_found', 'error': 'Tarea no encontrada'})
-    if task['status'] in ['completed', 'failed']:
-        tasks.pop(task_id, None)
+    task = tasks.get(task_id)
+    
+    if not task:
+        return jsonify({'status': 'not_found', 'error': 'Tarea no encontrada'}), 404
+
     return jsonify(task)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
